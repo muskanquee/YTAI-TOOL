@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARKZONE-YT - YouTube Video Downloader</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #ff0000;
+            --accent-hover: #cc0000;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--bg-secondary);
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .search-input {
+            width: 70%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 30px 0 0 30px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .search-button {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 0 30px 30px 0;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .search-button:hover {
+            background: var(--accent-hover);
+        }
+        
+        .results-container {
+            display: none;
+            margin: 30px 0;
+        }
+        
+        .video-card {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .video-thumbnail {
+            width: 360px;
+            height: 202px;
+            object-fit: cover;
+        }
+        
+        .video-info {
+            padding: 20px;
+            flex: 1;
+        }
+        
+        .video-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        
+        .video-channel {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+        
+        .video-duration {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .download-button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            display: inline-block;
+        }
+        
+        .download-button:hover {
+            background: var(--accent-hover);
+        }
+        
+        .loading {
+            text-align: center;
+            display: none;
+            margin: 30px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid var(--accent);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: var(--accent);
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        footer {
+            background: var(--bg-secondary);
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .disclaimer {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            max-width: 800px;
+            margin: 0 auto 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .video-card {
+                flex-direction: column;
+            }
+            
+            .video-thumbnail {
+                width: 100%;
+                height: auto;
+            }
+            
+            .search-input {
+                width: 60%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">DARKZONE-YT</div>
+            <p class="tagline">Download YouTube Videos in 720p HD Quality</p>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="search-container">
+            <input type="text" class="search-input" id="videoUrl" placeholder="Paste YouTube video URL here..." autocomplete="off">
+            <button class="search-button" id="searchButton">Download</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your request...</p>
+        </div>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="results-container" id="resultsContainer">
+            <!-- Video results will be displayed here -->
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p class="disclaimer">
+                Disclaimer: This tool is for personal use only. Please ensure you comply with YouTube's Terms of Service when downloading content. 
+                We do not store or distribute downloaded videos.
+            </p>
+            <p>© 2025 DARKZONE-YT. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchButton = document.getElementById('searchButton');
+            const videoUrlInput = document.getElementById('videoUrl');
+            const loadingElement = document.getElementById('loading');
+            const errorMessageElement = document.getElementById('errorMessage');
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            searchButton.addEventListener('click', handleSearch);
+            videoUrlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+            
+            function handleSearch() {
+                const videoUrl = videoUrlInput.value.trim();
+                
+                if (!videoUrl) {
+                    showError('Please enter a YouTube video URL');
+                    return;
+                }
+                
+                // Extract video ID from various YouTube URL formats
+                const videoId = extractYouTubeId(videoUrl);
+                if (!videoId) {
+                    showError('Please enter a valid YouTube URL');
+                    return;
+                }
+                
+                // Hide previous results and errors
+                resultsContainer.style.display = 'none';
+                errorMessageElement.style.display = 'none';
+                
+                // Show loading indicator
+                loadingElement.style.display = 'block';
+                
+                // Fetch video information
+                fetchVideoInfo(videoId);
+            }
+            
+            function extractYouTubeId(url) {
+                const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[7].length === 11) ? match[7] : null;
+            }
+            
+            function fetchVideoInfo(videoId) {
+                // Using the provided RapidAPI key and host
+                const options = {
+                    method: 'GET',
+                    headers: {
+                        'x-rapidapi-host': 'youtube138.p.rapidapi.com',
+                        'x-rapidapi-key': 'adb03fd619msh91f2556557237f4p10f659jsn96ca8c5079ee'
+                    }
+                };
+                
+                fetch(`https://youtube138.p.rapidapi.com/video/details/?id=${videoId}&hl=en&gl=US`, options)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch video information');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Hide loading indicator
+                        loadingElement.style.display = 'none';
+                        
+                        // Display video information
+                        displayVideoInfo(data);
+                    })
+                    .catch(error => {
+                        loadingElement.style.display = 'none';
+                        showError('Error: ' + error.message);
+                    });
+            }
+            
+            function displayVideoInfo(videoData) {
+                // Clear previous results
+                resultsContainer.innerHTML = '';
+                
+                // Create video card
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                
+                // Extract highest quality thumbnail available
+                const thumbnails = videoData.thumbnails || [];
+                const thumbnailUrl = thumbnails.length > 0 ? thumbnails[thumbnails.length - 1].url : '';
+                
+                // Format video duration
+                const duration = formatDuration(videoData.lengthSeconds);
+                
+                videoCard.innerHTML = `
+                    <img src="${thumbnailUrl}" alt="${videoData.title}" class="video-thumbnail">
+                    <div class="video-info">
+                        <h2 class="video-title">${videoData.title}</h2>
+                        <p class="video-channel">Channel: ${videoData.author}</p>
+                        <span class="video-duration">${duration}</span>
+                        <br>
+                        <button class="download-button" onclick="downloadVideo('${videoData.videoId}')">Download 720p Video</button>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(videoCard);
+                resultsContainer.style.display = 'block';
+            }
+            
+            function formatDuration(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+            }
+            
+            function showError(message) {
+                errorMessageElement.textContent = message;
+                errorMessageElement.style.display = 'block';
+            }
+            
+            // Make downloadVideo function available globally
+            window.downloadVideo = function(videoId) {
+                // Show loading indicator
+                loadingElement.style.display = 'block';
+                resultsContainer.style.display = 'none';
+                errorMessageElement.style.display = 'none';
+                
+                // In a real implementation, you would call your backend here
+                // Since we can't directly implement server-side code in this frontend example,
+                // we'll simulate the process and provide instructions
+                
+                setTimeout(() => {
+                    loadingElement.style.display = 'none';
+                    
+                    // This is a simulation - in a real application, you would have a backend
+                    // that handles the actual video downloading
+                    showError('Backend download service required for full functionality. Please set up a server with yt-dlp or similar library.');
+                    
+                    // For a real implementation, you would need to:
+                    // 1. Set up a backend server with an endpoint like /download
+                    // 2. Use a library like yt-dlp or pytube to fetch the video
+                    // 3. Return the download link to the frontend
+                    
+                    // Example backend implementation would look like:
+                    /*
+                    const backendUrl = 'https://your-backend.com/download';
+                    fetch(`${backendUrl}?videoId=${videoId}&quality=720p`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.downloadUrl) {
+                                window.location.href = data.downloadUrl;
+                            } else {
+                                showError('Download failed: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            showError('Download error: ' + error.message);
+                        });
+                    */
+                }, 1500);
+            };
+        });
+    </script>
+</body>
+  </html>
