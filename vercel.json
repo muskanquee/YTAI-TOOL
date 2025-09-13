@@ -1,1 +1,38 @@
-
+{
+  "version": 2,
+  "name": "darkzone-yt",
+  "builds": [
+    {
+      "src": "api/download.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    },
+    {
+      "src": "/api/download",
+      "methods": ["GET"],
+      "dest": "/api/download.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/index.html"
+    }
+  ],
+  "functions": {
+    "api/download.js": {
+      "includeFiles": "**/*"
+    }
+  },
+  "env": {
+    "RAPIDAPI_KEY": "adb03fd619msh91f2556557237f4p10f659jsn96ca8c5079ee",
+    "RAPIDAPI_HOST": "youtube138.p.rapidapi.com"
+  }
+}
